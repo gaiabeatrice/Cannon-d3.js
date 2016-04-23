@@ -1,0 +1,152 @@
+<html>
+
+    <head>
+      <meta charset="UTF-8">
+      <title>[Cannon] Gaia Beatrice | InfoVis Project </title>
+      <script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
+    </head>
+
+    <body>
+
+        <svg width=900 height=900></svg>
+
+        <script>
+        var svg = d3.select('svg');
+        var areaWidth = 900;
+        var areaHeight = 900;
+        var originX = areaWidth / 2;
+        var originY = areaHeight / 2;
+        var delta = 0;
+
+        d3.select("body")
+              .on("keydown", function() {
+                  if(event.keyCode === 32){
+                      shootBullet();
+                  }
+                  if(event.keyCode === 37){
+                      moveLeft();
+                  }
+                  if(event.keyCode === 39){
+                      moveRight();
+                  }
+                  if(event.keyCode === 38){
+                      moveUp();
+                  }
+              });
+
+        var group = svg.append("g");
+
+        var circle = group.append("circle").attr({
+            cx: originX,
+            cy: originY,
+            r: 40,
+            fill: "black",
+            stroke: "black"
+        });
+
+        var backCircle = group.append("circle").attr({
+            cx: originX,
+            cy: originY + 50,
+            r: 10,
+            fill: "black",
+            stroke: "black"
+        });
+
+        var axis = group.append("rect").attr({
+            x: originX - 55,
+            y: originY,
+            height: 5,
+            width: 110,
+            fill: "black"
+        });
+
+        var rightWheel = group.append("rect").attr({
+            x: originX + 55,
+            y: originY - 30,
+            height: 60,
+            width: 20,
+            fill: "black"
+        });
+
+        var leftWheel = group.append("rect").attr({
+            x: originX - 75,
+            y: originY - 30,
+            height: 60,
+            width: 20,
+            fill: "black"
+        });
+
+        var borderPath = svg.append("rect")
+               		.attr("x", 0)
+               		.attr("y", 0)
+               		.attr("height", areaHeight)
+               		.attr("width", areaWidth)
+               		.style("stroke", "black")
+               		.style("fill", "none");
+
+
+        function moveLeft(){
+            delta = delta - 3;
+            group.transition().attrTween("transform", tween);
+        }
+
+        function moveRight(){
+            delta = delta + 3;
+            group.transition().attrTween("transform", tween);
+        }
+
+        function moveUp(){
+          delta = 0;
+          group.transition().attrTween("transform", tween);
+        }
+
+        function shootBullet(){
+            var bullet = svg.append("circle").attr({
+                cx: cannonOriginX,
+                cy: cannonOriginY,
+                r: 30,
+                opacity: 0.7,
+                fill: function() {return "hsl(" + Math.random() * 360 + ",100%,50%)";},
+                stroke: "black"
+            });
+            bullet.moveToBack();
+            bullet.transition()
+                .duration(800)
+                .attr("cx", (originX + ((areaWidth + areaWidth / 2) * Math.sin(0))) - 10)
+                .attr("cy", (originY - ((areaHeight + areaHeight / 2) * Math.cos(0))) - 10)
+                .style("opacity", 1)
+                .attrTween("transform", tween);
+        }
+
+        var cannonOriginX = originX + ((60) * Math.sin(0));
+        var cannonOriginY = originY - ((60) * Math.cos(0));
+
+        var cannonWidth = 80;
+        var cannon = group.append("rect").attr({
+            x: cannonOriginX - (cannonWidth / 2),
+            y: originX - 75,
+            width: cannonWidth,
+            opacity: 1,
+            height: 80,
+            fill: "black",
+            stroke: "black"
+        });
+
+        var tween = function (d, i, a) {
+            return d3.interpolateString("rotate(" + delta + "," + originX +"," + originY + ")", "rotate(" + delta + "," + originX +"," + originY + ")");
+        }
+
+        d3.selection.prototype.moveToBack = function() {
+            return this.each(function() {
+                var firstChild = this.parentNode.firstChild;
+                if (firstChild) {
+                    this.parentNode.insertBefore(this, firstChild);
+                }
+            });
+        };
+
+        </script>
+        <div>Premi le <b>frecce</b> per muovere il cannone e lo <b>spazio</b> per sparare. Per riposizionare il cannone premi la <b>freccia in alto</b>.</div>
+
+    </body>
+</html>
